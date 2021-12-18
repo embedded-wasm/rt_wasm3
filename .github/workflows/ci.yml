@@ -11,6 +11,8 @@ env:
 
 jobs:
   build_rs:
+    name: Build via cargo
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
