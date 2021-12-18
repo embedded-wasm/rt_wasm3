@@ -1,0 +1,28 @@
+[package]
+name = "wasm-embedded-rt-wasm3"
+description = "Embedded WASM C/wasm3 runtime library"
+repository = "https://github.com/embedded-wasm/rt_wasm3"
+authors = [
+  "Ryan Kurte <ryan@kurte.nz>"
+]
+version = "0.1.0"
+edition = "2018"
+license = "MPL-2.0"
+
+# Links argument required to pass variables downstream
+links = "wasme"
+
+[dependencies]
+cty = "0.2.2"
+
+[dependencies.wasm-embedded-spec]
+version = "0.2.0"
+default_features = false
+features = [ "bind_c" ]
+
+[build-dependencies]
+bindgen = { version = "0.53.1", default_features = false, features=[ "runtime", "which-rustfmt" ] }
+cmake = "0.1"
+
+[patch.crates-io]
+#wasm-embedded-spec = { path = "../spec" }
