@@ -27,10 +27,10 @@ fn main() {
         .header("inc/wasm_embedded/wasm3/i2c.h")
         .header("inc/wasm_embedded/wasm3/spi.h")
         .header("inc/wasm_embedded/wasm3/gpio.h")
+        .blacklist_type("gpio_drv_t")
+        .blacklist_type("spi_drv_t")
+        .blacklist_type("i2c_drv_t")
         .whitelist_type("wasme.*")
-        .whitelist_type("i2c.*")
-        .whitelist_type("spi.*")
-        .whitelist_type("gpio.*")
         .whitelist_function("WASME.*");
 
     // Patches to help bindgen with cross compiling

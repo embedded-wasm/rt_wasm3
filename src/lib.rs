@@ -6,4 +6,6 @@
 
 pub use cty::{c_char};
 
+pub use wasm_embedded_spec::api::{gpio_drv_t, spi_drv_t, i2c_drv_t};
+
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
