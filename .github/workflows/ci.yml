@@ -53,15 +53,15 @@ jobs:
       run: |
         sudo apt install libclang-dev
 
-    - name: Install ${{ matrix.target }} cross toolchain
+    - name: Install armv6 cross toolchain
       if: ${{ matrix.target == 'armv7-unknown-linux-gnueabihf' }}
       run: sudo apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
 
-    - name: Install ${{ matrix.target }} cross toolchain
+    - name: Install aarch64 cross toolchain
       if: ${{ matrix.target == 'aarch64-unknown-linux-gnu' }}
       run: sudo apt install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
 
-    - name: Install ${{ matrix.target }} cross toolchain
+    - name: Install thumbv7em cross toolchain
       if: ${{ matrix.target == 'thumbv7em-none-eabihf' }}
       run: sudo apt install gcc-arm-none-eabi
 
