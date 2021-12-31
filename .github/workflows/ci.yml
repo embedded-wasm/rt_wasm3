@@ -63,7 +63,7 @@ jobs:
 
     - name: Install ${{ matrix.target }} cross toolchain
       if: ${{ matrix.target == 'thumbv7em-none-eabihf' }}
-      run: sudo apt install gcc-arm-none-eabi g++-arm-none-eabi
+      run: sudo apt install gcc-arm-none-eabi
 
     - name: Build library (via cargo)
       uses: actions-rs/cargo@v1
