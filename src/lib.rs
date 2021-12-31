@@ -6,6 +6,8 @@
 
 pub use cty::{c_char};
 
+// Driver types defined in wasm_embedded_spec
 pub use wasm_embedded_spec::api::{gpio_drv_t, spi_drv_t, i2c_drv_t};
 
+// Rust bindings for wasm3 C library
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
