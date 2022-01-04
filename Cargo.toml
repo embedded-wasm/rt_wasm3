@@ -23,7 +23,7 @@ log = "0.4.14"
 thiserror = { version = "1.0.30", optional = true }
 
 [dependencies.wasm-embedded-spec]
-version = "0.2.0"
+version = "0.3.0"
 default_features = false
 features = [ "bind_c" ]
 
