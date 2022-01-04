@@ -12,8 +12,15 @@ license = "MPL-2.0"
 # Links argument required to pass variables downstream
 links = "wasme"
 
+[features]
+std = []
+default = [ "std", "thiserror" ]
+
 [dependencies]
 cty = "0.2.2"
+embedded-hal = "1.0.0-alpha.5"
+log = "0.4.14"
+thiserror = { version = "1.0.30", optional = true }
 
 [dependencies.wasm-embedded-spec]
 version = "0.2.0"
