@@ -89,3 +89,33 @@ pub extern "C" fn gpio_set<T: Gpio>(ctx: *const c_void, handle: i32, value: u32)
     }
 }
 
+#[cfg(test)]
+mod test {
+    use wasm_embedded_spec::gpio::MockGpio;
+    use super::*;
+
+    #[test]
+    fn test_gpio_set() {
+        let mut gpio = MockGpio::new();
+        let ptr = MockGpio::context(&mut gpio);
+
+        // Set high
+        gpio.expect_set()
+            .withf(|h: &i32, v: &PinState| *h == 2 && *v == PinState::High )
+            .return_const(Ok(()));
+
+        let res = unsafe { MockGpio::DRIVER.set.unwrap()(ptr, 2, PinState::High as u32) };
+
+        assert_eq!(res, 0);
+
+        // Set low
+        gpio.expect_set()
+            .withf(|h: &i32, v: &PinState| *h == 2 && *v == PinState::Low )
+            .return_const(Ok(()));
+
+        let res = unsafe { MockGpio::DRIVER.set.unwrap()(ptr, 2, PinState::Low as u32) };
+
+        assert_eq!(res, 0);
+    }
+}
+
