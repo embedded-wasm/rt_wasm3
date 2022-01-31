@@ -15,7 +15,6 @@ extern "C"
 typedef struct wasme_ctx_s wasme_ctx_t;
 
 typedef struct {
-    const char* name;
     const uint8_t* data;
     uint32_t data_len;
 } wasme_task_t;
@@ -24,7 +23,7 @@ typedef struct {
 /// Intialise WASME ctx with the provided task
 wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit);
 
-/// Execute the specified function
+/// Execute the named function
 int WASME_run(wasme_ctx_t* ctx, const char* name, int32_t argc, const char** argv);
 
 /// De-initialise a WASME instance
