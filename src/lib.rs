@@ -67,7 +67,6 @@ impl Wasm3Runtime {
     pub fn new<E: Engine>(engine: &mut E, data: &[u8]) -> Result<Self, Wasm3Err> {
         // Setup WASME task
         let task = wasme_task_t{
-            name: TASK_NAME.as_ptr() as *const c_char,
             data: data.as_ptr(),
             data_len: data.len() as u32,
         };

@@ -10,11 +10,11 @@ option(WASME_BUILD_WASM3 "Include WASM3 in build" ON)
 option(WASME_USE_WASI "Enable WASI" ON)
 
 if(WASME_USE_WASI)
-message("WASI ENABLED")
-set (WASME_ARGS -DWASIENV=1 -DBUILD_WASI=simple -DM3_USE_EXTENSIONS=1)
+    message("WASI ENABLED")
+    set (WASME_ARGS -DWASIENV=1 -DBUILD_WASI=simple -DM3_USE_EXTENSIONS=1)
 else()
-message("WASI DISABLED")
-set(WASME_ARGS -DBUILD_WASI=none)
+    message("WASI DISABLED")
+    set(WASME_ARGS -DBUILD_WASI=none)
 endif()
 
 # Setup WASM3 for building / linking if enabled

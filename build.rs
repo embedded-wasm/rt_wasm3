@@ -92,7 +92,7 @@ fn main() {
         },
         Ok("thumbv7em-none-eabihf") => {
             builder.env("CC", "arm-none-eabi-gcc");
-            builder.env("CFLAGS", "-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nosys.specs -lnosys -lm -lc -lgcc");
+            builder.env("CFLAGS", "-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nosys.specs -lnosys -lm -lc -lgcc -Dd_m3FixedHeap=32768 -DDEBUG=1");
             builder.env("LDFLAGS", "-lnosys -lm -lc -lgcc");
 
             builder.define("WASME_USE_WASI", "OFF");

@@ -13,14 +13,17 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
 
     wasme_ctx_t* ctx = malloc(sizeof(wasme_ctx_t));
     if(!ctx) {
-        return ctx;
+        printf("Allocating wasme_ctx_t failed\r\n");
+        res = -1;
+
+        return NULL;
     }
 
     // Setup environment
     ctx->env = m3_NewEnvironment ();
     if (!ctx->env) {
-        printf("NewEnvironment failed");
-        res = -1;
+        printf("NewEnvironment failed\r\n");
+        res = -2;
 
         goto teardown_env;
     }
@@ -28,19 +31,19 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
     // Setup runtime
     ctx->rt = m3_NewRuntime(ctx->env, mem_limit, NULL);
     if (!ctx->rt) {
-        printf("NewRuntime failed");
-        res = -2;
+        printf("NewRuntime failed\r\n");
+        res = -3;
 
         goto teardown_rt;
     }
 
-    printf( "Loading WebAssembly (p: %p, %d bytes)...\n", (void*)task->data, task->data_len);
+    printf( "Loading WebAssembly (p: %p, %d bytes)...\r\n", (void*)task->data, task->data_len);
 
     // Parse module into environment
     m3_res = m3_ParseModule (ctx->env, &ctx->mod, task->data, task->data_len);
     if (m3_res) {
-        printf("ParseModule failed: %s", m3_res);
-        res = -3;
+        printf("ParseModule failed: %s\r\n", m3_res);
+        res = -4;
 
         // Only unloaded modules should be manually freed
         m3_FreeModule(ctx->mod);
@@ -51,7 +54,7 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
     // Load module into runtime
     m3_res = m3_LoadModule(ctx->rt, ctx->mod);
     if (m3_res) {
-        printf("LoadModule failed: %s", m3_res);
+        printf("LoadModule failed: %s\r\n", m3_res);
         res = -5;
 
         goto teardown_rt;
@@ -61,8 +64,8 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
     // Link WASI functions
     m3_res = m3_LinkWASI(ctx->mod);
     if (m3_res) {
-        printf("LinkWasi failed: %s", m3_res);
-        res = -4;
+        printf("LinkWasi failed: %s\r\n", m3_res);
+        res = -6;
 
         goto teardown_rt;
     }
