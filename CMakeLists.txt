@@ -19,12 +19,16 @@ endif()
 
 # Setup WASM3 for building / linking if enabled
 if(WASME_BUILD_WASM3)
+message("BUILDING WASM3")
+
 
 ExternalProject_Add(
     wasm3
     GIT_REPOSITORY https://github.com/ryankurte/wasm3.git
     GIT_TAG fix/externalproject-build
-    CMAKE_ARGS ${WASME_ARGS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}  -DCMAKE_C_COMPILER_WORKS=1
+    #GIT_REPOSITORY https://github.com/wasm3/wasm3.git
+    #GIT_TAG main
+    CMAKE_ARGS ${WASME_ARGS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 -DBUILD_NATIVE=off
     UPDATE_COMMAND ""
     INSTALL_COMMAND cp source/libm3.a ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -88,7 +92,7 @@ add_library(wasme ${WASME_SOURCES})
 if(WASME_BUILD_WASM3)
 
 add_dependencies(wasme wasm3)
-target_link_libraries(wasme ${WASM3_LIB})
+target_link_libraries(wasme ${WASM3_LIB} m)
 install(FILES ${WASM3_LIB} DESTINATION .)
 
 endif()

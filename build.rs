@@ -27,11 +27,11 @@ fn main() {
         .header("inc/wasm_embedded/wasm3/i2c.h")
         .header("inc/wasm_embedded/wasm3/spi.h")
         .header("inc/wasm_embedded/wasm3/gpio.h")
-        .blacklist_type("gpio_drv_t")
-        .blacklist_type("spi_drv_t")
-        .blacklist_type("i2c_drv_t")
-        .whitelist_type("wasme.*")
-        .whitelist_function("WASME.*");
+        .blocklist_type("gpio_drv_t")
+        .blocklist_type("spi_drv_t")
+        .blocklist_type("i2c_drv_t")
+        .allowlist_type("wasme.*")
+        .allowlist_function("WASME.*");
 
     // Patches to help bindgen with cross compiling
     // See: https://github.com/rust-lang/rust-bindgen/issues/1229#issuecomment-366522257
@@ -57,7 +57,7 @@ fn main() {
                 .clang_arg("-target")
                 .clang_arg("arm-none-eabihf")
                 // TODO: this seems... fragile
-                .clang_arg("-I/usr/lib/gcc/arm-none-eabi/8.3.1/include/")
+                //.clang_arg("-I/usr/lib/gcc/arm-none-eabi/8.3.1/include/")
         },
         _ => builder,
     };
@@ -75,7 +75,12 @@ fn main() {
     // CC has to be set here because CMAKE_C_COMPILER is ignored by ExternalProject_Add
     // and setting CC at the top level causes build.rs to collapse...
     let mut builder = Config::new("./");
+    
+    #[cfg(feature = "build-wasm3")]
     builder.define("WASME_BUILD_WASM3", "ON");
+    #[cfg(not(feature = "build-wasm3"))]
+    builder.define("WASME_BUILD_WASM3", "OFF");
+
     builder.define("WASME_SPEC_DIR", spec_dir);
     
     match std::env::var("TARGET").as_deref() {
@@ -85,13 +90,16 @@ fn main() {
         Ok("aarch64-unknown-linux-gnu") => {
             builder.env("CC", "aarch64-linux-gnu-gcc");
         },
-        #[cfg(nope)]
         Ok("thumbv7em-none-eabihf") => {
             builder.env("CC", "arm-none-eabi-gcc");
+            builder.env("CFLAGS", "-mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 --specs=nosys.specs -lnosys -lm -lc -lgcc");
+            builder.env("LDFLAGS", "-lnosys -lm -lc -lgcc");
+
             builder.define("WASME_USE_WASI", "OFF");
+            
             builder.define("BUILD_NATIVE", "OFF");
             builder.build_arg("VERBOSE=1");
-            builder.very_verbose(true);
+            //builder.very_verbose(true);
         },
         #[cfg(nope)]
         Ok("thumbv7em-none-eabihf") => {
@@ -111,5 +119,5 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", dst.display());
     println!("cargo:rustc-link-lib=static=wasme");
     println!("cargo:rustc-link-lib=static=m3");
-
+    //println!("cargo:rustc-link-lib=static=m");
 }

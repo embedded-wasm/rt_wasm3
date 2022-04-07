@@ -32,6 +32,7 @@ const START_STR: &'static [u8] = b"_start\0";
 /// WASM3 runtime errors
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature="thiserror", derive(thiserror::Error))]
+#[cfg_attr(feature="defmt", derive(defmt::Format))]
 pub enum Wasm3Err {
     #[cfg_attr(feature="thiserror", error("Failed to create context"))]
     Ctx,

@@ -57,6 +57,7 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
         goto teardown_rt;
     }
 
+#ifdef WASIENV
     // Link WASI functions
     m3_res = m3_LinkWASI(ctx->mod);
     if (m3_res) {
@@ -65,6 +66,7 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
 
         goto teardown_rt;
     }
+#endif
 
     return ctx;
 
@@ -109,10 +111,13 @@ int WASME_run(wasme_ctx_t* ctx, const char* name, int32_t argc, const char** arg
         return -1;
     }
 
+#ifdef WASIENV
     // Bind argc/argv via WASI
     m3_wasi_context_t* wasi_ctx = m3_GetWasiContext();
     wasi_ctx->argc = argc;
     wasi_ctx->argv = argv;
+    // TODO: actually use this?
+#endif
 
     // Call function
     m3_res = m3_Call(f, 0, NULL);
