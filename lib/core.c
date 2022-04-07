@@ -34,7 +34,7 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
         goto teardown_rt;
     }
 
-    printf( "Loading WebAssembly (mod: %s, p: %p, %d bytes)...\n", task->name, (void*)task->data, task->data_len);
+    printf( "Loading WebAssembly (p: %p, %d bytes)...\n", (void*)task->data, task->data_len);
 
     // Parse module into environment
     m3_res = m3_ParseModule (ctx->env, &ctx->mod, task->data, task->data_len);
