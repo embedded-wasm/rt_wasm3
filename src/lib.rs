@@ -25,8 +25,7 @@ mod i2c;
 // Rust bindings for wasm3 C library
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-
-const TASK_NAME: &'static [u8] = b"wasme\0";
+// Start symbol name in wasm binary
 const START_STR: &'static [u8] = b"_start\0";
 
 /// WASM3 runtime errors

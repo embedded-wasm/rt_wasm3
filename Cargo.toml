@@ -41,7 +41,3 @@ mockall = "0.11.0"
 version = "0.3.0"
 default_features = false
 features = [ "bind_c", "mocks", "std" ]
-
-
-[patch.crates-io]
-#wasm-embedded-spec = { path = "../spec" }
