@@ -30,7 +30,7 @@ default_features = false
 features = [ "bind_c" ]
 
 [build-dependencies]
-bindgen = { version = "0.59.2", default_features = false, features=[ "runtime", "which-rustfmt" ] }
+bindgen = { version = "0.63.0", default_features = false, features=[ "runtime", "which-rustfmt" ] }
 cmake = "0.1"
 
 
