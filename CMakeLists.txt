@@ -83,6 +83,7 @@ set(WASME_SOURCES
     lib/i2c.c
     lib/spi.c
     lib/gpio.c
+    lib/uart.c
     lib/wasi.c
 )
 

@@ -14,12 +14,13 @@ pub use cty::{c_char};
 
 // Driver types defined in wasm_embedded_spec
 pub use wasm_embedded_spec::{self as spec};
-pub use spec::api::{gpio_drv_t, spi_drv_t, i2c_drv_t};
+pub use spec::api::{gpio_drv_t, spi_drv_t, i2c_drv_t, uart_drv_t};
 
 // Driver modules
 mod gpio;
 mod spi;
 mod i2c;
+mod uart;
 
 
 // Rust bindings for wasm3 C library
@@ -53,10 +54,10 @@ pub struct Wasm3Runtime {
     ctx: *mut wasme_ctx_t,
 }
 
-pub trait Engine: spec::gpio::Gpio + spec::i2c::I2c + spec::spi::Spi {}
+pub trait Engine: spec::gpio::Gpio + spec::i2c::I2c + spec::spi::Spi + spec::uart::Uart {}
 
 impl <T> Engine for T where
-    T: spec::gpio::Gpio + spec::i2c::I2c + spec::spi::Spi ,
+    T: spec::gpio::Gpio + spec::i2c::I2c + spec::spi::Spi + spec::uart::Uart,
 {
 }
 
@@ -85,6 +86,7 @@ impl Wasm3Runtime {
         rt.bind::<gpio_drv_t, _>(engine)?;
         rt.bind::<spi_drv_t, _>(engine)?;
         rt.bind::<i2c_drv_t, _>(engine)?;
+        rt.bind::<uart_drv_t, _>(engine)?;
 
         Ok(rt)
     }

@@ -26,10 +26,12 @@ fn main() {
         .header("inc/wasm_embedded/wasm3/core.h")
         .header("inc/wasm_embedded/wasm3/i2c.h")
         .header("inc/wasm_embedded/wasm3/spi.h")
+        .header("inc/wasm_embedded/wasm3/uart.h")
         .header("inc/wasm_embedded/wasm3/gpio.h")
         .blocklist_type("gpio_drv_t")
         .blocklist_type("spi_drv_t")
         .blocklist_type("i2c_drv_t")
+        .blocklist_type("uart_drv_t")
         .allowlist_type("wasme.*")
         .allowlist_function("WASME.*");
 

@@ -86,6 +86,34 @@ typedef struct {
     uint32_t len;
 } buff_t;
 
+m3ApiRawFunction(m3_spi_read)
+{
+    // Load arguments
+    m3ApiReturnType  (int32_t)
+    m3ApiGetArg      (int32_t, handle)
+    m3ApiGetArg      (uint32_t, ptr);
+
+    // Resolve relative buffer object pointer
+    uint32_t* mem_p = m3ApiOffsetToPtr(ptr);
+    // Resolve relative data pointer im buffer
+    uint8_t* data = m3ApiOffsetToPtr(*mem_p);
+    // Fetch length, imo this should be *mem_p + 4 but, idk
+    uint32_t* len = m3ApiOffsetToPtr(ptr+4);
+
+    WASME_SPI_DEBUG_PRINTF("SPI read data: %p len: %d\r\n", data, *len);
+
+    // Check args are valid
+    if (!runtime) { m3ApiReturn(__WASI_ERRNO_FAULT); }
+    if (!spi_drv) { m3ApiReturn(__WASI_ERRNO_NODEV); }
+    if (!spi_drv->write) { m3ApiReturn(__WASI_ERRNO_NOENT); }
+
+    WASME_SPI_DEBUG_PRINTF("SPI read port: %d, %d bytes (%p)\r\n", handle, *len, data);
+
+    int32_t res = spi_drv->read(spi_drv_ctx, handle, data, *len);
+
+    m3ApiReturn(res);
+}
+
 m3ApiRawFunction(m3_spi_write)
 {
     // Load arguments
@@ -119,6 +147,43 @@ m3ApiRawFunction(m3_spi_transfer)
     // Load arguments
     m3ApiReturnType  (int32_t)
     m3ApiGetArg      (int32_t, handle)
+    m3ApiGetArg      (uint32_t, read_ptr)
+    m3ApiGetArg      (uint32_t, write_ptr);
+
+    // Resolve relative buffer object pointer
+    uint32_t* read_mem_p = m3ApiOffsetToPtr(read_ptr);
+    // Resolve relative data pointer im buffer
+    uint8_t* read_data = m3ApiOffsetToPtr(*read_mem_p);
+    // Fetch length, imo this should be *mem_p + 4 but, idk
+    uint32_t* read_len = m3ApiOffsetToPtr(read_ptr+4);
+
+    // Resolve relative buffer object pointer
+    uint32_t* write_mem_p = m3ApiOffsetToPtr(read_ptr);
+    // Resolve relative data pointer im buffer
+    uint8_t* write_data = m3ApiOffsetToPtr(*write_mem_p);
+    // Fetch length, imo this should be *mem_p + 4 but, idk
+    uint32_t* write_len = m3ApiOffsetToPtr(read_ptr+4);
+
+
+    WASME_SPI_DEBUG_PRINTF("SPI transfer port: %d, read: %p write %p len: %d\r\n", handle, read_data, write_data, *read_len);
+
+    // Check args are valid
+    if (!runtime) { m3ApiReturn(__WASI_ERRNO_FAULT); }
+    if (!spi_drv) { m3ApiReturn(__WASI_ERRNO_NODEV); }
+    if (!spi_drv->transfer) { m3ApiReturn(__WASI_ERRNO_NOENT); }
+
+    int32_t res = spi_drv->transfer(spi_drv_ctx, handle, read_data, write_data, *read_len);
+
+    WASME_SPI_DEBUG_PRINTF("SPI transfer port: %d, %d bytes (read: %p write: %p)\r\n", handle, *read_len, read_data, write_data);
+
+    m3ApiReturn(res);
+}
+
+m3ApiRawFunction(m3_spi_transfer_inplace)
+{
+    // Load arguments
+    m3ApiReturnType  (int32_t)
+    m3ApiGetArg      (int32_t, handle)
     m3ApiGetArg      (uint32_t, ptr);
 
     // Resolve relative buffer object pointer
@@ -128,16 +193,16 @@ m3ApiRawFunction(m3_spi_transfer)
     // Fetch length, imo this should be *mem_p + 4 but, idk
     uint32_t* len = m3ApiOffsetToPtr(ptr+4);
 
-    WASME_SPI_DEBUG_PRINTF("SPI transfer port: %d, data: %p len: %d\r\n", handle, data, *len);
+    WASME_SPI_DEBUG_PRINTF("SPI transfer_inplace port: %d, data: %p len: %d\r\n", handle, data, *len);
 
     // Check args are valid
     if (!runtime) { m3ApiReturn(__WASI_ERRNO_FAULT); }
     if (!spi_drv) { m3ApiReturn(__WASI_ERRNO_NODEV); }
     if (!spi_drv->transfer) { m3ApiReturn(__WASI_ERRNO_NOENT); }
 
-    int32_t res = spi_drv->transfer(spi_drv_ctx, handle, data, *len);
+    int32_t res = spi_drv->transfer_inplace(spi_drv_ctx, handle, data, *len);
 
-    WASME_SPI_DEBUG_PRINTF("SPI read port: %d, %d bytes (%p)\r\n", handle, *len, data);
+    WASME_SPI_DEBUG_PRINTF("SPI transfer_inplace port: %d, %d bytes (%p)\r\n", handle, *len, data);
 
     m3ApiReturn(res);
 }
@@ -154,9 +219,13 @@ int32_t WASME_bind_spi(wasme_ctx_t* ctx, const spi_drv_t* drv, void* drv_ctx) {
     
     m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "deinit", "i(i)", &m3_spi_deinit);
     
+    m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "read", "i(ii)", &m3_spi_read);
+
     m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "write", "i(ii)", &m3_spi_write);
     
-    m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "transfer", "i(ii)", &m3_spi_transfer);
+    m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "transfer", "i(iii)", &m3_spi_transfer);
+
+    m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "transfer_inplace", "i(ii)", &m3_spi_transfer_inplace);
     
     // TODO: link exec function here when implemented
     //m3_res = m3_LinkRawFunction(ctx->mod, wasme_spi_mod, "write_read", "i(iiii)", &m3_spi_write_read);
