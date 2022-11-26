@@ -63,7 +63,7 @@ m3ApiRawFunction(m3_i2c_deinit)
 {
     // Load arguments
     m3ApiReturnType  (int32_t)
-    m3ApiGetArg      (uint32_t, handle)
+    m3ApiGetArg      (int32_t, handle)
 
     WASME_I2C_DEBUG_PRINTF("I2C deinit handle: %d\r\n", handle);
 

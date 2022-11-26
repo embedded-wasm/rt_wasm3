@@ -23,8 +23,8 @@ impl<T: Gpio> Driver<gpio_drv_t> for T {
 
 pub extern "C" fn gpio_init<T: Gpio>(
     ctx: *const c_void,
-    port: u32,
-    pin: u32,
+    port: i32,
+    pin: i32,
     output: u32,
 ) -> i32 {
     let ctx: &mut T = unsafe { &mut *(ctx as *mut T) };
