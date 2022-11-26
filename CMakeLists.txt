@@ -11,7 +11,7 @@ option(WASME_USE_WASI "Enable WASI" ON)
 
 if(WASME_USE_WASI)
     message("WASI ENABLED")
-    set (WASME_ARGS -DWASIENV=1 -DBUILD_WASI=simple -DM3_USE_EXTENSIONS=1)
+    set (WASME_ARGS -DWASIENV=1 -DBUILD_WASI=none)
 else()
     message("WASI DISABLED")
     set(WASME_ARGS -DBUILD_WASI=none)
@@ -19,13 +19,13 @@ endif()
 
 # Setup WASM3 for building / linking if enabled
 if(WASME_BUILD_WASM3)
-message("BUILDING WASM3")
+message("WASM3 BUILD ENABLED")
 
 
 ExternalProject_Add(
     wasm3
     GIT_REPOSITORY https://github.com/ryankurte/wasm3.git
-    GIT_TAG fix/externalproject-build
+    GIT_TAG fix/wasienv-link-libm
     #GIT_REPOSITORY https://github.com/wasm3/wasm3.git
     #GIT_TAG main
     CMAKE_ARGS ${WASME_ARGS} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_C_COMPILER_WORKS=1 -DCMAKE_CXX_COMPILER_WORKS=1 -DBUILD_NATIVE=off
@@ -83,6 +83,7 @@ set(WASME_SOURCES
     lib/i2c.c
     lib/spi.c
     lib/gpio.c
+    lib/wasi.c
 )
 
 # Build library

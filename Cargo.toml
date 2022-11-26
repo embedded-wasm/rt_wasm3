@@ -13,14 +13,14 @@ license = "MPL-2.0"
 links = "wasme"
 
 [features]
-std = []
+std = [ "log/std", "wasm-embedded-spec/std" ]
 build-wasm3 = []
 default = [ "std", "thiserror", "build-wasm3" ]
 
 [dependencies]
 cty = "0.2.2"
 embedded-hal = "1.0.0-alpha.5"
-log = "0.4.14"
+log = { version = "0.4.14", default_features = false }
 thiserror = { version = "1.0.30", optional = true }
 #wasm3-sys = { version = "*", features = [ "build-bindgen" ] }
 
@@ -33,11 +33,4 @@ features = [ "bind_c" ]
 bindgen = { version = "0.63.0", default_features = false, features=[ "runtime", "which-rustfmt" ] }
 cmake = "0.1"
 
-
 [dev-dependencies]
-mockall = "0.11.0"
-
-[dev-dependencies.wasm-embedded-spec]
-version = "0.3.0"
-default_features = false
-features = [ "bind_c", "mocks", "std" ]

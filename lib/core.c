@@ -60,7 +60,6 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
         goto teardown_rt;
     }
 
-#ifdef WASIENV
     // Link WASI functions
     m3_res = m3_LinkWASI(ctx->mod);
     if (m3_res) {
@@ -69,7 +68,6 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
 
         goto teardown_rt;
     }
-#endif
 
     return ctx;
 
@@ -126,6 +124,23 @@ int WASME_run(wasme_ctx_t* ctx, const char* name, int32_t argc, const char** arg
     m3_res = m3_Call(f, 0, NULL);
     if (m3_res) {
         printf("CallWithArgs failed: %s\r\n", m3_res);
+
+        M3ErrorInfo error_info = { 0 };
+        m3_GetErrorInfo(ctx->rt, &error_info);
+
+        printf("message: %s\r\n", error_info.message);
+
+        if (error_info.module) {
+            printf("module: %s\r\n", m3_GetModuleName(error_info.module));
+        }
+
+        if (error_info.function) {
+            printf("function: %s\r\n", m3_GetFunctionName(error_info.function));
+        }
+
+        m3_PrintM3Info();
+        m3_PrintRuntimeInfo(ctx->rt);
+
         return -2;
     }
 

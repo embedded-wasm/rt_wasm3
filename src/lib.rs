@@ -90,6 +90,11 @@ impl Wasm3Runtime {
     }
 
     pub fn bind<I, D: Driver<I>>(&mut self, driver: &mut D) -> Result<(), Wasm3Err> {
+        debug!("Binding {} driver: {}", 
+            core::any::type_name::<I>(),
+            core::any::type_name::<D>(),
+        );
+
         let res = driver.bind(self);
         if res < 0 {
             Err(Wasm3Err::Bind(res))
