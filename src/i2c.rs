@@ -19,7 +19,7 @@ impl<T: I2c> Driver<i2c_drv_t> for T {
     };
 
     fn bind(&mut self, rt: &mut Wasm3Runtime) -> i32 {
-    unsafe { crate::WASME_bind_i2c(rt.ctx, &Self::DRIVER, self.context()) }
+        unsafe { crate::WASME_bind_i2c(rt.ctx, &Self::DRIVER, self.context()) }
     }
 }
 

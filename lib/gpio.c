@@ -8,6 +8,7 @@
 #include "m3_info.h"
 #include "extra/wasi_core.h"
 
+#include "wasm_embedded/wasm3/api.h"
 #include "wasm_embedded/wasm3/gpio.h"
 #include "wasm_embedded/wasm3/internal.h"
 
@@ -128,8 +129,64 @@ m3ApiRawFunction(fake_deinit)
     m3ApiReturn(res);
 }
 
+/// @brief  GPIO instruction enumeration
+/// MUST match that in gpio.witx
+enum gpio_ins_e {
+    GpioInsInit = 0,
+    GpioInsDeinit = 1,
+    GpioInsSet = 2,
+    GpioInsGet = 3,
+};
+
+
+
+
+/// Polyfill for GPIO driver in syscall mode
+int32_t gpio_drv_exec(
+    uint32_t ins, uint32_t flags,
+    int32_t handle,
+    uint8_t* cmd_buff, uint32_t cmd_len,
+    uint8_t* resp_buff, uint32_t resp_len) {
+
+    int32_t res = 0;
+
+    // Check for driver context
+    if (!gpio_drv) { return __WASI_ERRNO_NOTCAPABLE; }
+
+    // Handle instructions
+    switch(ins) {
+    case GpioInsInit:
+        // Check init function is bound
+        if (!gpio_drv->init) { return __WASI_ERRNO_NOENT; }
+        // Check command is valid
+        if (cmd_len != sizeof(gpio_init_t)) {
+            return __WASI_ERRNO_BADMSG;
+        }
+        gpio_init_t* cmd = (gpio_init_t*)cmd_buff;
+
+        // Execute command via driver
+        res = gpio_drv->init(gpio_drv_ctx, cmd->port, cmd->pin, cmd->mode);
+
+    break;
+
+    // TODO: the rest of the GPIO instructions
+
+    default:
+        printf("Unhandled GPIO instruction: %d", ins);
+        return __WASI_ERRNO_NOEXEC;
+    }
+
+    return res;
+}
+
 int32_t WASME_bind_gpio(wasme_ctx_t* ctx, const gpio_drv_t* drv, void* drv_ctx) {
     M3Result m3_res;
+
+    // Syscall-based bindings
+    // TODO: pass context, remove when syscall refactor complete
+    WASME_bind(ctx, ClaGpio, gpio_drv_exec, NULL);
+
+    // Legacy bindings
 
     m3_res = m3_LinkRawFunction(ctx->mod, wasme_gpio_mod, "init", "i(iiii)", &m3_gpio_init);
     if (m3_res) {
@@ -154,6 +211,7 @@ int32_t WASME_bind_gpio(wasme_ctx_t* ctx, const gpio_drv_t* drv, void* drv_ctx) 
         goto gpio_bind_err;
     }
 
+    // Setup contexts
     gpio_drv = drv;
     gpio_drv_ctx = drv_ctx;
     

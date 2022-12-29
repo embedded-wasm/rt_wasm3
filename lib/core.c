@@ -6,6 +6,10 @@
 
 #include "wasm3.h"
 #include "m3_api_wasi.h"
+#include "m3_env.h"
+#include "m3_exception.h"
+#include "m3_info.h"
+#include "extra/wasi_core.h"
 
 wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
     M3Result m3_res;
@@ -28,8 +32,8 @@ wasme_ctx_t* WASME_init(const wasme_task_t* task, uint32_t mem_limit) {
         goto teardown_env;
     }
 
-    // Setup runtime
-    ctx->rt = m3_NewRuntime(ctx->env, mem_limit, NULL);
+    // Setup runtime, binding wasme context as userdata
+    ctx->rt = m3_NewRuntime(ctx->env, mem_limit, ctx);
     if (!ctx->rt) {
         printf("NewRuntime failed\r\n");
         res = -3;
@@ -148,4 +152,76 @@ int WASME_run(wasme_ctx_t* ctx, const char* name, int32_t argc, const char** arg
     // TODO: fetch result (int)
 
     return 0;
+}
+
+/// @brief bind a driver to the provided wasme context
+int WASME_bind(wasme_ctx_t* ctx, uint32_t cla, core_driver_handle_f drv, void* drv_ctx) {
+    // Check the context object exists
+    if (!ctx) {
+        return -1;
+    }
+    // Check we have driver slots available
+    if (ctx->num_drivers >= CORE_MAX_DRIVERS) {
+        return -2;
+    }
+
+    // Bind the driver to the next available slot
+    int index = ctx->num_drivers;
+    ctx->drivers[index].class = cla;
+    ctx->drivers[index].handle = drv;
+    ctx->drivers[index].ctx = drv_ctx;
+
+    // Increment the driver count
+    ctx->num_drivers += 1;
+
+    return 0;
+}
+
+//! Execute the provided syscall via matching driver
+m3ApiRawFunction(m3_core_exec)
+{
+    // Load arguments
+    m3ApiReturnType  (int32_t)
+    m3ApiGetArg      (uint32_t, cla)
+    m3ApiGetArg      (uint32_t, ins)
+    m3ApiGetArg      (uint32_t, flags)
+    m3ApiGetArg      (int32_t, handle)
+    m3ApiGetArg      (uint32_t, cmd_ptr)
+    m3ApiGetArg      (uint32_t, resp_ptr);
+
+    // Resolve command buffer memory offsets
+    uint32_t* cmd_ptr_m3 = m3ApiOffsetToPtr(cmd_ptr);
+    uint8_t* cmd_data = m3ApiOffsetToPtr(*cmd_ptr_m3);
+    uint32_t* cmd_len = m3ApiOffsetToPtr(cmd_ptr+4);
+
+    // Resolve response buffer memory offsets
+    uint32_t* resp_ptr_m3 = m3ApiOffsetToPtr(resp_ptr);
+    uint8_t* resp_data = m3ApiOffsetToPtr(*resp_ptr_m3);
+    uint32_t* resp_len = m3ApiOffsetToPtr(resp_ptr+4);
+
+    WASME_I2C_DEBUG_PRINTF("CORE exec CLA: %d INS: %d FLAGS: %p DEVICE: %d\r\n", cla, ins, flags, handle);
+
+    // Check runtime and fetch context from userdata
+    if (!runtime) { m3ApiReturn(__WASI_ERRNO_NOSYS); }
+    if (!runtime->userdata) { m3ApiReturn(__WASI_ERRNO_NOSYS); }
+    wasme_ctx_t* ctx = (wasme_ctx_t*) m3_GetUserData(runtime);
+
+    // Locate driver instance by class
+    wasme_driver_t* drv = NULL;
+    for (int i=0; i<ctx->num_drivers; i++) {
+        if (ctx->drivers[i].class == cla) {
+            drv = &ctx->drivers[i];
+            break;
+        }
+    }
+    if (!drv) { 
+        WASME_I2C_DEBUG_PRINTF("CORE no driver found for CLA: %d\r\n", cla);
+        m3ApiReturn(__WASI_ERRNO_NOLINK);
+    }
+
+    // Execute driver operation
+    int32_t res = drv->handle(ins, flags, handle, cmd_data, *cmd_len, resp_data, *resp_len);
+
+    // Return driver result
+    m3ApiReturn(res);
 }
