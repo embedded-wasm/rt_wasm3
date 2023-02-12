@@ -4,7 +4,7 @@ use core::slice;
 
 use log::debug;
 
-use wasm_embedded_spec::{i2c::I2c, api::i2c_drv_t};
+use wasm_embedded_spec::{I2c, bindgen::i2c_drv_t};
 
 use crate::{Driver, Wasm3Runtime};
 

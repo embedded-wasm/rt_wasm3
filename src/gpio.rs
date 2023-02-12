@@ -1,7 +1,7 @@
 
 use core::ffi::c_void;
 
-use wasm_embedded_spec::{gpio::Gpio, api::gpio_drv_t};
+use wasm_embedded_spec::{Gpio, bindgen::gpio_drv_t};
 use embedded_hal::digital::PinState;
 
 use crate::{Driver, Wasm3Runtime};

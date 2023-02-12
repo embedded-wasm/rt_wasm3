@@ -4,7 +4,7 @@ use core::slice;
 
 use log::debug;
 
-use wasm_embedded_spec::{uart::Uart, api::uart_drv_t};
+use wasm_embedded_spec::{Uart, bindgen::uart_drv_t};
 
 use crate::{Driver, Wasm3Runtime};
 

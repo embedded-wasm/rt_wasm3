@@ -5,7 +5,7 @@ use core::slice;
 
 use log::{warn};
 
-use wasm_embedded_spec::{spi::Spi, api::spi_drv_t};
+use wasm_embedded_spec::{Spi, bindgen::spi_drv_t};
 
 use crate::{Driver, Wasm3Runtime};
 
